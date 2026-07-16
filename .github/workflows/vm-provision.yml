@@ -98,7 +98,9 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Terraform Init
-        run: terraform init
+        env:
+          CLOUD_PROVIDER: ${{ vars.CLOUD_PROVIDER || 'aws' }}
+        run: bash ../../scripts/init-backend.sh
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan -input=false
@@ -139,7 +141,9 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Terraform Init
-        run: terraform init
+        env:
+          CLOUD_PROVIDER: ${{ vars.CLOUD_PROVIDER || 'aws' }}
+        run: bash ../../scripts/init-backend.sh
 
       - name: Terraform Apply
         run: terraform apply -auto-approve -input=false
