@@ -97,14 +97,15 @@ jobs:
       - name: Terraform Init
         run: bash ../../scripts/init-backend.sh
 
+      # fmt before writing TF_VARS — generated terraform.tfvars must not fail the check
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive ../../
+
       - name: Write terraform.tfvars
         uses: ./.github/actions/write-tfvars
         with:
           tf_vars: ${{ secrets.TF_VARS }}
           working_directory: terraform/environments/${{ matrix.environment }}
-
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive ../../
 
       - name: Terraform Validate
         run: terraform validate
