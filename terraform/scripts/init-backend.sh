@@ -12,6 +12,7 @@ CLOUD="${1:-${CLOUD_PROVIDER:-azure}}"
 CLOUD="$(echo "$CLOUD" | tr '[:upper:]' '[:lower:]')"
 
 OVERRIDE_FILE="backend_override.tf"
+INIT_ARGS=(-reconfigure -backend-config=)
 
 case "$CLOUD" in
   aws)
@@ -35,5 +36,13 @@ EOF
     ;;
 esac
 
+INIT_ARGS=(-reconfigure "-backend-config=${BACKEND_CONFIG}")
+
+# GitHub Actions logs in as a Service Principal via OIDC. Terraform cannot use
+# Azure CLI auth for SPs — enable native OIDC for the azurerm backend instead.
+if [ "$CLOUD" = "azure" ] && [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+  INIT_ARGS+=(-backend-config="use_oidc=true")
+fi
+
 echo "Initializing Terraform with $CLOUD backend ($BACKEND_CONFIG)"
-terraform init -reconfigure -backend-config="$BACKEND_CONFIG"
+terraform init "${INIT_ARGS[@]}"
