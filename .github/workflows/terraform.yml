@@ -117,6 +117,12 @@ jobs:
       - name: Terraform Init
         run: bash ../../scripts/init-backend.sh
 
+      - name: Write terraform.tfvars
+        uses: ./.github/actions/write-tfvars
+        with:
+          tf_vars: ${{ secrets.TF_VARS }}
+          working_directory: terraform/environments/${{ github.event.inputs.environment }}
+
       - name: Terraform Plan
         run: terraform plan -out=tfplan -input=false
 
@@ -161,6 +167,12 @@ jobs:
 
       - name: Terraform Init
         run: bash ../../scripts/init-backend.sh
+
+      - name: Write terraform.tfvars
+        uses: ./.github/actions/write-tfvars
+        with:
+          tf_vars: ${{ secrets.TF_VARS }}
+          working_directory: terraform/environments/${{ github.event.inputs.environment }}
 
       - uses: actions/download-artifact@v4
         with:
@@ -216,6 +228,12 @@ jobs:
 
       - name: Terraform Init
         run: bash ../../scripts/init-backend.sh
+
+      - name: Write terraform.tfvars
+        uses: ./.github/actions/write-tfvars
+        with:
+          tf_vars: ${{ secrets.TF_VARS }}
+          working_directory: terraform/environments/${{ github.event.inputs.environment }}
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve -input=false

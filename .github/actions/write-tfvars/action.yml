@@ -1,0 +1,26 @@
+name: Write terraform.tfvars
+description: Materialize Environment secret TF_VARS into terraform.tfvars (gitignored)
+
+inputs:
+  tf_vars:
+    description: Full contents of terraform.tfvars from GitHub Environment secret TF_VARS
+    required: true
+  working_directory:
+    description: Environment directory that should receive terraform.tfvars
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Write terraform.tfvars
+      shell: bash
+      env:
+        TF_VARS: ${{ inputs.tf_vars }}
+      working-directory: ${{ inputs.working_directory }}
+      run: |
+        if [ -z "${TF_VARS}" ]; then
+          echo "::error::GitHub Environment secret TF_VARS is empty. Add the terraform.tfvars contents as secret TF_VARS on this environment."
+          exit 1
+        fi
+        printf '%s\n' "${TF_VARS}" > terraform.tfvars
+        echo "Wrote ${{ inputs.working_directory }}/terraform.tfvars ($(wc -l < terraform.tfvars) lines)"

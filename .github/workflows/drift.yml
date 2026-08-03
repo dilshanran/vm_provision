@@ -92,6 +92,12 @@ jobs:
       - name: Terraform Init
         run: bash ../../scripts/init-backend.sh
 
+      - name: Write terraform.tfvars
+        uses: ./.github/actions/write-tfvars
+        with:
+          tf_vars: ${{ secrets.TF_VARS }}
+          working_directory: terraform/environments/${{ matrix.environment }}
+
       - name: Terraform Format Check
         run: terraform fmt -check -recursive ../../
 
