@@ -47,7 +47,7 @@ jobs:
           fi
 
   drift:
-    name: Drift (${{ matrix.environment }} / ${{ env.CLOUD_PROVIDER }})
+    name: Drift (${{ matrix.environment }} / ${{ github.event.inputs.cloud || vars.CLOUD_PROVIDER || 'azure' }})
     needs: prepare
     runs-on: ubuntu-latest
     strategy:
@@ -56,7 +56,7 @@ jobs:
         environment: ${{ fromJSON(needs.prepare.outputs.environments) }}
     # Share the same lock as terraform.yml so drift cannot overlap a deploy.
     concurrency:
-      group: vm-provision-${{ matrix.environment }}-${{ env.CLOUD_PROVIDER }}
+      group: vm-provision-${{ matrix.environment }}-${{ github.event.inputs.cloud || vars.CLOUD_PROVIDER || 'azure' }}
       cancel-in-progress: false
     environment: ${{ matrix.environment }}
     permissions:
