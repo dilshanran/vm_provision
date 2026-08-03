@@ -17,18 +17,19 @@ variable "vms" {
   }))
 }
 
-variable "aws_config" {
-  description = "AWS-specific settings (required when cloud_provider = aws)."
-  type = object({
-    ami_id                 = string
-    vpc_security_group_ids = list(string)
-    key_name               = optional(string)
-    iam_instance_profile   = optional(string)
-    root_volume_size       = optional(number, 30)
-    root_volume_type       = optional(string, "gp3")
-  })
-  default = null
-}
+# AWS disabled — Azure-only testing. Uncomment when enabling AWS.
+# variable "aws_config" {
+#   description = "AWS-specific settings (required when cloud_provider = aws)."
+#   type = object({
+#     ami_id                 = string
+#     vpc_security_group_ids = list(string)
+#     key_name               = optional(string)
+#     iam_instance_profile   = optional(string)
+#     root_volume_size       = optional(number, 30)
+#     root_volume_type       = optional(string, "gp3")
+#   })
+#   default = null
+# }
 
 variable "azure_config" {
   description = "Azure-specific settings (required when cloud_provider = azure)."

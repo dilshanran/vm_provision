@@ -1,0 +1,132 @@
+name: Drift Detection
+
+on:
+  schedule:
+    # Daily at 06:00 UTC
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - all
+          - dev
+          - uat
+          - prod
+        default: all
+      cloud:
+        description: "Cloud provider"
+        required: true
+        type: choice
+        options:
+          - azure
+          - aws
+        default: azure
+
+env:
+  TF_VERSION: "1.9.0"
+  # Manual runs use the chosen cloud; scheduled runs fall back to repo var / azure
+  CLOUD_PROVIDER: ${{ github.event.inputs.cloud || vars.CLOUD_PROVIDER || 'azure' }}
+
+jobs:
+  prepare:
+    name: Resolve environments
+    runs-on: ubuntu-latest
+    outputs:
+      environments: ${{ steps.set.outputs.environments }}
+    steps:
+      - id: set
+        run: |
+          INPUT="${{ github.event.inputs.environment }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$INPUT" ] && [ "$INPUT" != "all" ]; then
+            echo "environments=[\"${INPUT}\"]" >> "$GITHUB_OUTPUT"
+          else
+            echo 'environments=["dev","uat","prod"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  drift:
+    name: Drift (${{ matrix.environment }} / ${{ env.CLOUD_PROVIDER }})
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJSON(needs.prepare.outputs.environments) }}
+    # Share the same lock as terraform.yml so drift cannot overlap a deploy.
+    concurrency:
+      group: vm-provision-${{ matrix.environment }}-${{ env.CLOUD_PROVIDER }}
+      cancel-in-progress: false
+    environment: ${{ matrix.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate (OIDC)
+        uses: ./.github/actions/cloud-oidc
+        with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # Catch formatting and configuration errors early (same order as terraform.yml).
+      - name: Terraform Init
+        run: bash ../../scripts/init-backend.sh
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Detect drift
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -input=false -no-color -out=drift.tfplan
+          EXIT_CODE=$?
+          set -e
+
+          case $EXIT_CODE in
+            0)
+              echo "No drift detected in ${{ matrix.environment }}"
+              {
+                echo "### Drift — ${{ matrix.environment }} / ${{ env.CLOUD_PROVIDER }}"
+                echo "No drift detected."
+              } >> "$GITHUB_STEP_SUMMARY"
+              ;;
+            2)
+              echo "Drift detected in ${{ matrix.environment }}"
+              terraform show -no-color drift.tfplan
+              {
+                echo "### Drift — ${{ matrix.environment }} / ${{ env.CLOUD_PROVIDER }}"
+                echo "Drift detected."
+                echo '```'
+                terraform show -no-color drift.tfplan
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+              ;;
+            *)
+              echo "Terraform plan failed with exit code $EXIT_CODE"
+              exit "$EXIT_CODE"
+              ;;
+          esac

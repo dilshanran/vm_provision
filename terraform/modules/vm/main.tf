@@ -19,12 +19,12 @@ module "aws" {
   region                 = var.region
   subnet_id              = var.subnet_id
   tags                   = local.common_tags
-  ami_id                 = var.aws_config.ami_id
-  vpc_security_group_ids = var.aws_config.vpc_security_group_ids
-  key_name               = var.aws_config.key_name
-  iam_instance_profile   = var.aws_config.iam_instance_profile
-  root_volume_size       = var.aws_config.root_volume_size
-  root_volume_type       = var.aws_config.root_volume_type
+  ami_id                 = try(var.aws_config.ami_id, null)
+  vpc_security_group_ids = try(var.aws_config.vpc_security_group_ids, [])
+  key_name               = try(var.aws_config.key_name, null)
+  iam_instance_profile   = try(var.aws_config.iam_instance_profile, null)
+  root_volume_size       = try(var.aws_config.root_volume_size, 30)
+  root_volume_type       = try(var.aws_config.root_volume_type, "gp3")
 }
 
 module "azure" {

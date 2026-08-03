@@ -1,0 +1,25 @@
+name: Terraform Plugin Cache
+description: Cache Terraform providers under ~/.terraform.d/plugin-cache
+
+inputs:
+  terraform_version:
+    description: Terraform version (used in the cache key)
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare plugin cache directory
+      shell: bash
+      run: |
+        CACHE_DIR="${HOME}/.terraform.d/plugin-cache"
+        mkdir -p "$CACHE_DIR"
+        echo "TF_PLUGIN_CACHE_DIR=${CACHE_DIR}" >> "$GITHUB_ENV"
+
+    - name: Cache Terraform plugins
+      uses: actions/cache@v4
+      with:
+        path: ~/.terraform.d/plugin-cache
+        key: tf-plugins-${{ runner.os }}-${{ inputs.terraform_version }}-${{ hashFiles('terraform/**/.terraform.lock.hcl') }}
+        restore-keys: |
+          tf-plugins-${{ runner.os }}-${{ inputs.terraform_version }}-

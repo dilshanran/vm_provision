@@ -10,7 +10,7 @@ module "vm" {
   subnet_id      = each.value.subnet_id
   tags           = var.tags
 
-  aws_config   = var.aws_config
+  # aws_config = var.aws_config  # AWS disabled — Azure-only testing
   azure_config = var.azure_config
 }
 

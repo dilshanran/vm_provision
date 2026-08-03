@@ -1,0 +1,64 @@
+name: PR Validation
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/**"
+      - ".github/actions/**"
+
+# One validation run per PR (queue newer commits, do not cancel mid-run).
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.9.0"
+
+jobs:
+  # Catch formatting and configuration errors early (Init → fmt → validate).
+  checks:
+    name: Checks (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, uat, prod]
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Check mandatory tags
+        run: |
+          if [ ! -f terraform.tfvars.example ]; then
+            echo "No terraform.tfvars.example — skipping tag check"
+            exit 0
+          fi
+          for key in Team Application CostCentre; do
+            grep -qE "^\s*${key}\s*=" terraform.tfvars.example || {
+              echo "Missing mandatory tag in terraform.tfvars.example: ${key}"
+              exit 1
+            }
+          done

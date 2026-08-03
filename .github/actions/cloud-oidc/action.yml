@@ -1,0 +1,42 @@
+name: Cloud OIDC Login
+description: Authenticate to AWS or Azure using GitHub Actions OIDC (no long-lived secrets)
+
+inputs:
+  cloud:
+    description: Cloud provider (aws or azure)
+    required: true
+  aws_role_arn:
+    description: AWS IAM role ARN to assume via OIDC
+    required: false
+  aws_region:
+    description: AWS region
+    required: false
+    default: us-east-1
+  azure_client_id:
+    description: Azure AD application (client) ID
+    required: false
+  azure_tenant_id:
+    description: Azure AD tenant ID
+    required: false
+  azure_subscription_id:
+    description: Azure subscription ID
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Configure AWS credentials (OIDC)
+      if: ${{ inputs.cloud == 'aws' }}
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.aws_role_arn }}
+        aws-region: ${{ inputs.aws_region }}
+        role-session-name: github-actions-vm-provision
+
+    - name: Configure Azure credentials (OIDC)
+      if: ${{ inputs.cloud == 'azure' }}
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure_client_id }}
+        tenant-id: ${{ inputs.azure_tenant_id }}
+        subscription-id: ${{ inputs.azure_subscription_id }}

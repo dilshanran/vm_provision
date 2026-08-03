@@ -1,0 +1,221 @@
+name: Terraform
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action"
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+      cloud:
+        description: "Cloud provider"
+        required: true
+        type: choice
+        options:
+          - azure
+          - aws
+        default: azure
+
+# One deployment at a time per environment + cloud (queue, do not cancel).
+concurrency:
+  group: vm-provision-${{ github.event.inputs.environment }}-${{ github.event.inputs.cloud }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.9.0"
+  CLOUD_PROVIDER: ${{ github.event.inputs.cloud }}
+
+jobs:
+  # Catch formatting and configuration errors early before plan/apply/destroy.
+  checks:
+    name: Checks (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate (OIDC)
+        uses: ./.github/actions/cloud-oidc
+        with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: bash ../../scripts/init-backend.sh
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive ../../
+
+      - name: Terraform Validate
+        run: terraform validate
+
+  plan:
+    name: Plan (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'plan' || github.event.inputs.action == 'apply'
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate (OIDC)
+        uses: ./.github/actions/cloud-oidc
+        with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: bash ../../scripts/init-backend.sh
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan -input=false
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ github.event.inputs.environment }}-${{ github.event.inputs.cloud }}
+          path: terraform/environments/${{ github.event.inputs.environment }}/tfplan
+
+  apply:
+    name: Apply (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
+    needs: plan
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'apply'
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate (OIDC)
+        uses: ./.github/actions/cloud-oidc
+        with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: bash ../../scripts/init-backend.sh
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan-${{ github.event.inputs.environment }}-${{ github.event.inputs.cloud }}
+          path: terraform/environments/${{ github.event.inputs.environment }}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Outputs
+        run: |
+          terraform output -no-color
+          {
+            echo "### Terraform outputs"
+            echo '```'
+            terraform output -no-color
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  destroy:
+    name: Destroy (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'destroy'
+    environment: ${{ github.event.inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: terraform/environments/${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Cache Terraform plugins
+        uses: ./.github/actions/terraform-plugin-cache
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Authenticate (OIDC)
+        uses: ./.github/actions/cloud-oidc
+        with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
+          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
+          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
+          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: bash ../../scripts/init-backend.sh
+
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve -input=false
