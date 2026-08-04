@@ -8,6 +8,11 @@ output "private_ip" {
   value       = var.cloud_provider == "aws" ? module.aws[0].private_ip : module.azure[0].private_ip
 }
 
+output "public_ip" {
+  description = "Public IP address when enabled (Azure); null otherwise."
+  value       = var.cloud_provider == "azure" ? module.azure[0].public_ip : null
+}
+
 output "hostname" {
   description = "Configured hostname of the VM."
   value       = var.cloud_provider == "aws" ? module.aws[0].hostname : module.azure[0].hostname

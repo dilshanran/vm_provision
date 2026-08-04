@@ -43,6 +43,7 @@ variable "azure_config" {
     image_version       = optional(string, "latest")
     os_disk_size_gb     = optional(number, 30)
     os_disk_type        = optional(string, "Standard_LRS")
+    enable_public_ip    = optional(bool, false)
   })
   default = null
 }

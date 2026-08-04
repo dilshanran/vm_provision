@@ -20,6 +20,7 @@ output "vms" {
     for key, vm in module.vm : key => {
       instance_id    = vm.instance_id
       private_ip     = vm.private_ip
+      public_ip      = vm.public_ip
       hostname       = vm.hostname
       cloud_provider = vm.cloud_provider
     }
