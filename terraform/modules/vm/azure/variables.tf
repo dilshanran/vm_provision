@@ -57,3 +57,9 @@ variable "os_disk_size_gb" {
 variable "os_disk_type" {
   type = string
 }
+
+variable "enable_public_ip" {
+  description = "Attach a public IP and SSH NSG for direct internet access (demo/testing)."
+  type        = bool
+  default     = false
+}

@@ -46,4 +46,5 @@ module "azure" {
   image_version       = var.azure_config.image_version
   os_disk_size_gb     = var.azure_config.os_disk_size_gb
   os_disk_type        = var.azure_config.os_disk_type
+  enable_public_ip    = var.azure_config.enable_public_ip
 }
