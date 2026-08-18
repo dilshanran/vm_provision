@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, uat, prod]
+        environment: [dev, stage, uat, prod]
     permissions:
       contents: read
     defaults:
