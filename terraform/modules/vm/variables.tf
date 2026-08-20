@@ -80,6 +80,10 @@ variable "azure_config" {
     os_disk_size_gb     = optional(number, 30)
     os_disk_type        = optional(string, "Standard_LRS")
     enable_public_ip    = optional(bool, false)
+    # Marketplace plan (needed for third-party images like Amazon Linux 2023)
+    plan_name      = optional(string)
+    plan_product   = optional(string)
+    plan_publisher = optional(string)
   })
   default = null
 
