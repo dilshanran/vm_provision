@@ -43,16 +43,8 @@ jobs:
   checks:
     name: Checks (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
     permissions:
-      id-token: write
       contents: read
-    env:
-      # Terraform OIDC for Service Principal (Azure CLI SP auth is not supported)
-      ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-      ARM_USE_OIDC: true
     defaults:
       run:
         working-directory: terraform/environments/${{ github.event.inputs.environment }}
@@ -68,18 +60,8 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Authenticate (OIDC)
-        uses: ./.github/actions/cloud-oidc
-        with:
-          cloud: ${{ env.CLOUD_PROVIDER }}
-          aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
-          aws_region: ${{ vars.AWS_REGION || 'us-east-1' }}
-          azure_client_id: ${{ vars.AZURE_CLIENT_ID }}
-          azure_tenant_id: ${{ vars.AZURE_TENANT_ID }}
-          azure_subscription_id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Terraform Init
-        run: bash ../../scripts/init-backend.sh
+      - name: Terraform Init (no backend)
+        run: terraform init -backend=false
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive ../../
