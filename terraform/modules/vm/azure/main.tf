@@ -93,6 +93,16 @@ resource "azurerm_linux_virtual_machine" "vm" {
     version   = var.image_version
   }
 
+  # Required for third-party Azure Marketplace images (e.g. Amazon Linux 2023).
+  dynamic "plan" {
+    for_each = var.plan_name != null && var.plan_name != "" ? [1] : []
+    content {
+      name      = var.plan_name
+      product   = var.plan_product
+      publisher = var.plan_publisher != null && var.plan_publisher != "" ? var.plan_publisher : var.image_publisher
+    }
+  }
+
   computer_name = substr(replace(var.hostname, "-", ""), 0, 15)
 
   tags = var.tags

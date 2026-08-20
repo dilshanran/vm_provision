@@ -37,14 +37,17 @@ variable "azure_config" {
     resource_group_name = string
     admin_username      = string
     ssh_public_key      = string
-    # Amazon Linux 2023 (Ntegral) — same image as Azure-VM-Demo
+    # Amazon Linux 2023 (Ntegral) Gen2 — eastus2 marketplace
     image_publisher  = optional(string, "ntegralinc1586961136942")
     image_offer      = optional(string, "ntg_amzn_linux_2023")
-    image_sku        = optional(string, "default")
+    image_sku        = optional(string, "ntg_amzn_linux_2023_gen2")
     image_version    = optional(string, "latest")
     os_disk_size_gb  = optional(number, 30)
     os_disk_type     = optional(string, "Standard_LRS")
     enable_public_ip = optional(bool, false)
+    plan_name        = optional(string, "ntg_amzn_linux_2023_gen2")
+    plan_product     = optional(string, "ntg_amzn_linux_2023")
+    plan_publisher   = optional(string, "ntegralinc1586961136942")
   })
   default = null
 }

@@ -63,3 +63,21 @@ variable "enable_public_ip" {
   type        = bool
   default     = false
 }
+
+variable "plan_name" {
+  description = "Marketplace plan name (required for third-party images). Leave null for first-party images."
+  type        = string
+  default     = null
+}
+
+variable "plan_product" {
+  description = "Marketplace plan product / offer."
+  type        = string
+  default     = null
+}
+
+variable "plan_publisher" {
+  description = "Marketplace plan publisher. Defaults to image_publisher when null."
+  type        = string
+  default     = null
+}

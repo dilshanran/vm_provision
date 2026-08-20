@@ -47,4 +47,7 @@ module "azure" {
   os_disk_size_gb     = var.azure_config.os_disk_size_gb
   os_disk_type        = var.azure_config.os_disk_type
   enable_public_ip    = var.azure_config.enable_public_ip
+  plan_name           = var.azure_config.plan_name
+  plan_product        = var.azure_config.plan_product
+  plan_publisher      = var.azure_config.plan_publisher
 }
