@@ -106,8 +106,4 @@ resource "azurerm_linux_virtual_machine" "vm" {
   computer_name = substr(replace(var.hostname, "-", ""), 0, 15)
 
   tags = var.tags
-
-  lifecycle {
-    ignore_changes = [source_image_reference]
-  }
 }
