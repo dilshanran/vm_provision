@@ -13,6 +13,7 @@ on:
         options:
           - all
           - dev
+          - stage
           - uat
           - prod
         default: all
@@ -43,7 +44,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$INPUT" ] && [ "$INPUT" != "all" ]; then
             echo "environments=[\"${INPUT}\"]" >> "$GITHUB_OUTPUT"
           else
-            echo 'environments=["dev","uat","prod"]' >> "$GITHUB_OUTPUT"
+            echo 'environments=["dev","stage","uat","prod"]' >> "$GITHUB_OUTPUT"
           fi
 
   drift:

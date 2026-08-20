@@ -19,12 +19,12 @@ variable "hostname" {
 }
 
 variable "environment" {
-  description = "Deployment environment (dev, test, uat, prod)."
+  description = "Deployment environment (dev, test, stage, uat, prod)."
   type        = string
 
   validation {
-    condition     = contains(["dev", "test", "uat", "prod"], var.environment)
-    error_message = "environment must be one of: dev, test, uat, prod."
+    condition     = contains(["dev", "test", "stage", "uat", "prod"], var.environment)
+    error_message = "environment must be one of: dev, test, stage, uat, prod."
   }
 }
 
