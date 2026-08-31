@@ -1,4 +1,4 @@
-﻿variable "cloud_provider" {
+variable "cloud_provider" {
   description = "Target cloud for this deployment: aws or azure."
   type        = string
 }
