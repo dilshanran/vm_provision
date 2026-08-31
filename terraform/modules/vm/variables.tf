@@ -50,9 +50,9 @@ variable "tags" {
 }
 
 variable "aws_config" {
-  description = "AWS-specific settings. Required when cloud_provider = aws."
+  description = "AWS-specific settings. Required when cloud_provider = aws. AMI defaults to Amazon Linux 2023 when ami_id is omitted."
   type = object({
-    ami_id                 = string
+    ami_id                 = optional(string)
     vpc_security_group_ids = list(string)
     key_name               = optional(string)
     iam_instance_profile   = optional(string)

@@ -1,9 +1,34 @@
-locals {
-  name_tag = var.hostname
+# Native Amazon Linux 2023 AMI from AWS (not Azure Marketplace).
+# Used when ami_id is omitted from aws_config.
+data "aws_ami" "al2023" {
+  count = var.ami_id == null ? 1 : 0
+
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-2023*-x86_64"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
 }
 
 resource "aws_instance" "vm" {
-  ami                    = var.ami_id
+  ami                    = local.ami_id
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
   vpc_security_group_ids = var.vpc_security_group_ids
@@ -35,8 +60,4 @@ resource "aws_instance" "vm" {
   tags = merge(var.tags, {
     Name = local.name_tag
   })
-
-  lifecycle {
-    ignore_changes = [ami]
-  }
 }

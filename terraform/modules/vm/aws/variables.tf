@@ -23,7 +23,9 @@ variable "tags" {
 }
 
 variable "ami_id" {
-  type = string
+  description = "Optional AMI ID. When null, the latest Amazon Linux 2023 x86_64 AMI is resolved automatically."
+  type        = string
+  default     = null
 }
 
 variable "vpc_security_group_ids" {
