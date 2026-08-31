@@ -21,3 +21,5 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+**/terraform_aws.tfvars

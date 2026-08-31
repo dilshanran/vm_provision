@@ -1,4 +1,4 @@
-variable "cloud_provider" {
+﻿variable "cloud_provider" {
   description = "Target cloud for this deployment: aws or azure."
   type        = string
 }
@@ -17,19 +17,18 @@ variable "vms" {
   }))
 }
 
-# AWS disabled — Azure-only. Uncomment when enabling AWS.
-# variable "aws_config" {
-#   description = "AWS-specific settings (required when cloud_provider = aws)."
-#   type = object({
-#     ami_id                 = string
-#     vpc_security_group_ids = list(string)
-#     key_name               = optional(string)
-#     iam_instance_profile   = optional(string)
-#     root_volume_size       = optional(number, 30)
-#     root_volume_type       = optional(string, "gp3")
-#   })
-#   default = null
-# }
+variable "aws_config" {
+  description = "AWS-specific settings (required when cloud_provider = aws). Omit ami_id to auto-select Amazon Linux 2023."
+  type = object({
+    ami_id                 = optional(string)
+    vpc_security_group_ids = list(string)
+    key_name               = optional(string)
+    iam_instance_profile   = optional(string)
+    root_volume_size       = optional(number, 30)
+    root_volume_type       = optional(string, "gp3")
+  })
+  default = null
+}
 
 variable "azure_config" {
   description = "Azure-specific settings (required when cloud_provider = azure). Defaults to Amazon Linux 2023 marketplace image."
@@ -63,3 +62,4 @@ variable "tags" {
     error_message = "tags must include non-empty values for: Team, Application, CostCentre."
   }
 }
+

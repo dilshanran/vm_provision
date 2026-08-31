@@ -1,0 +1,32 @@
+# Example AWS terraform.tfvars for dev
+# Copy values into GitHub Environment secret TF_VARS (and local terraform.tfvars if needed).
+# Amazon Linux 2023 AMI is resolved automatically when ami_id is omitted.
+
+cloud_provider = "aws"
+region         = "us-east-1"
+
+tags = {
+  Team        = "unix"
+  Application = "myapp"
+  CostCentre  = "IT-OPS-001"
+  Environment = "dev"
+}
+
+vms = {
+  "app-01" = {
+    hostname      = "SYSENG-UNIX-dev-01"
+    instance_type = "t3.medium"
+    subnet_id     = "subnet-xxxxxxxx" # replace with your AWS subnet
+  }
+}
+
+aws_config = {
+  # ami_id omitted => latest Amazon Linux 2023 x86_64 in this region
+  vpc_security_group_ids = ["sg-xxxxxxxx"] # replace with your SG(s)
+  # key_name             = "unix-team-dev"  # optional
+  # iam_instance_profile = "..."           # optional
+  root_volume_size       = 30
+  root_volume_type       = "gp3"
+}
+
+# azure_config is not required when cloud_provider = "aws"
