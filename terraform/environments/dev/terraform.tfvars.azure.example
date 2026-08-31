@@ -1,0 +1,48 @@
+# =============================================================================
+# Azure — example tfvars for dev
+#
+# Usage:
+#   - GitHub: paste into Environment secret TF_VARS (dev)
+#   - Local:  copy to terraform.tfvars (gitignored)
+#
+# Backend: ../../scripts/init-backend.sh azure
+# Workflow cloud input: azure
+#
+# Image: Amazon Linux 2023 Gen2 (Azure Marketplace / Ntegral)
+# =============================================================================
+
+cloud_provider = "azure"
+region         = "eastus2"
+
+tags = {
+  Team        = "unix"
+  Application = "myapp"
+  CostCentre  = "IT-OPS-001"
+  Environment = "dev"
+}
+
+vms = {
+  "app-01" = {
+    hostname      = "SYSENG-UNIX-DEV-01"
+    instance_type = "Standard_D2s_v3"
+    subnet_id     = "/subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.Network/virtualNetworks/<vnet>/subnets/<subnet>"
+  }
+}
+
+azure_config = {
+  resource_group_name = "SYSENG-VNET-Dev-rg"
+  admin_username      = "unixadmin"
+  ssh_public_key      = "ssh-rsa AAAA... your-key"
+  enable_public_ip    = false
+
+  # Marketplace image + plan (required for AL2023)
+  image_publisher = "ntegralinc1586961136942"
+  image_offer     = "ntg_amzn_linux_2023"
+  image_sku       = "ntg_amzn_linux_2023_gen2"
+  image_version   = "latest"
+  plan_name       = "ntg_amzn_linux_2023_gen2"
+  plan_product    = "ntg_amzn_linux_2023"
+  plan_publisher  = "ntegralinc1586961136942"
+}
+
+# Do not set aws_config when cloud_provider = "azure"

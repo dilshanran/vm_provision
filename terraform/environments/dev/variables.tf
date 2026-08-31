@@ -1,15 +1,19 @@
+# =============================================================================
+# Common (required for both AWS and Azure)
+# =============================================================================
+
 variable "cloud_provider" {
-  description = "Target cloud for this deployment: aws or azure."
+  description = "Target cloud: aws or azure."
   type        = string
 }
 
 variable "region" {
-  description = "Cloud region / location."
+  description = "AWS region or Azure location."
   type        = string
 }
 
 variable "vms" {
-  description = "Map of VMs to provision. Key is a stable identifier; value holds per-VM settings."
+  description = "Map of VMs to provision. Key is a stable identifier."
   type = map(object({
     hostname      = string
     instance_type = string
@@ -17,8 +21,25 @@ variable "vms" {
   }))
 }
 
+variable "tags" {
+  description = "Required tags for all VMs."
+  type        = map(string)
+
+  validation {
+    condition = alltrue([
+      for key in ["Team", "Application", "CostCentre"] :
+      contains(keys(var.tags), key) && trimspace(var.tags[key]) != ""
+    ])
+    error_message = "tags must include non-empty values for: Team, Application, CostCentre."
+  }
+}
+
+# =============================================================================
+# AWS (required when cloud_provider = "aws")
+# =============================================================================
+
 variable "aws_config" {
-  description = "AWS-specific settings (required when cloud_provider = aws). Omit ami_id to auto-select Amazon Linux 2023."
+  description = "AWS settings. Omit ami_id to use the latest Amazon Linux 2023 AMI."
   type = object({
     ami_id                 = optional(string)
     vpc_security_group_ids = list(string)
@@ -30,8 +51,12 @@ variable "aws_config" {
   default = null
 }
 
+# =============================================================================
+# Azure (required when cloud_provider = "azure")
+# =============================================================================
+
 variable "azure_config" {
-  description = "Azure-specific settings (required when cloud_provider = azure). Defaults to Amazon Linux 2023 marketplace image."
+  description = "Azure settings. Defaults to Amazon Linux 2023 marketplace image."
   type = object({
     resource_group_name = string
     admin_username      = string
@@ -49,17 +74,3 @@ variable "azure_config" {
   })
   default = null
 }
-
-variable "tags" {
-  description = "Mandatory resource tags applied to all VMs in this environment."
-  type        = map(string)
-
-  validation {
-    condition = alltrue([
-      for key in ["Team", "Application", "CostCentre"] :
-      contains(keys(var.tags), key) && trimspace(var.tags[key]) != ""
-    ])
-    error_message = "tags must include non-empty values for: Team, Application, CostCentre."
-  }
-}
-
