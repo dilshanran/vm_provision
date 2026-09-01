@@ -1,8 +1,8 @@
 # =============================================================================
-# Azure — example tfvars for uat
+# Azure â€” example tfvars for uat
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (uat)
+#   - GitHub: paste into Environment secret TF_VARS_AZURE (uat)
 #   - Local:  copy to terraform.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh azure

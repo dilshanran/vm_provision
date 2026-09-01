@@ -1,8 +1,8 @@
 # =============================================================================
-# Azure — example tfvars for prod
+# Azure â€” example tfvars for prod
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (prod)
+#   - GitHub: paste into Environment secret TF_VARS_AZURE (prod)
 #   - Local:  copy to terraform.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh azure
