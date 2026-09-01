@@ -4,7 +4,7 @@ Multi-cloud VM provisioning with Terraform and GitHub Actions (**AWS** and **Azu
 
 ## Docs
 
-- **[CI/CD Guide (A to Z for juniors)](docs/CI-CD-GUIDE.md)** — GitHub, Actions, AWS, Azure, flows, and step-by-step runs
+- **[CI/CD Guide (A to Z )](docs/CI-CD-GUIDE.md)** — GitHub, Actions, AWS, Azure, flows, and step-by-step runs
 
 ## Quick start (local)
 
