@@ -1,9 +1,9 @@
-﻿# =============================================================================
+# =============================================================================
 # AWS — example tfvars for stage
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (stage)
-#   - Local:  copy to terraform.tfvars (gitignored)
+#   - GitHub: paste into Environment secret TF_VARS_AWS (stage)
+#   - Local:  copy to terraform_aws.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh aws
 # Workflow cloud input: aws

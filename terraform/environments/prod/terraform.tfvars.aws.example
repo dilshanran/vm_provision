@@ -1,9 +1,9 @@
-﻿# =============================================================================
+# =============================================================================
 # AWS — example tfvars for prod
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (prod)
-#   - Local:  copy to terraform.tfvars (gitignored)
+#   - GitHub: paste into Environment secret TF_VARS_AWS (prod)
+#   - Local:  copy to terraform_aws.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh aws
 # Workflow cloud input: aws

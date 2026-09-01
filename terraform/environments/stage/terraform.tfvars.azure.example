@@ -1,8 +1,8 @@
 # =============================================================================
-# Azure — example tfvars for stage
+# Azure â€” example tfvars for stage
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (stage)
+#   - GitHub: paste into Environment secret TF_VARS_AZURE (stage)
 #   - Local:  copy to terraform.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh azure

@@ -2,7 +2,7 @@
 # Azure — example tfvars for dev
 #
 # Usage:
-#   - GitHub: paste into Environment secret TF_VARS (dev)
+#   - GitHub: paste into Environment secret TF_VARS_AZURE (dev)
 #   - Local:  copy to terraform.tfvars (gitignored)
 #
 # Backend: ../../scripts/init-backend.sh azure

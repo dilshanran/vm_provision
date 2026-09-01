@@ -1,10 +1,24 @@
 name: Write terraform.tfvars
-description: Materialize Environment secret TF_VARS into terraform.tfvars (gitignored)
+description: >
+  Materialize cloud-specific Environment secrets into terraform.tfvars.
+  Prefer TF_VARS_AWS / TF_VARS_AZURE; fall back to legacy TF_VARS if needed.
 
 inputs:
-  tf_vars:
-    description: Full contents of terraform.tfvars from GitHub Environment secret TF_VARS
+  cloud:
+    description: Cloud provider (aws or azure)
     required: true
+  tf_vars_aws:
+    description: Contents from Environment secret TF_VARS_AWS
+    required: false
+    default: ""
+  tf_vars_azure:
+    description: Contents from Environment secret TF_VARS_AZURE
+    required: false
+    default: ""
+  tf_vars:
+    description: Legacy Environment secret TF_VARS (fallback)
+    required: false
+    default: ""
   working_directory:
     description: Environment directory that should receive terraform.tfvars
     required: true
@@ -15,12 +29,42 @@ runs:
     - name: Write terraform.tfvars
       shell: bash
       env:
-        TF_VARS: ${{ inputs.tf_vars }}
+        CLOUD: ${{ inputs.cloud }}
+        TF_VARS_AWS: ${{ inputs.tf_vars_aws }}
+        TF_VARS_AZURE: ${{ inputs.tf_vars_azure }}
+        TF_VARS_LEGACY: ${{ inputs.tf_vars }}
       working-directory: ${{ inputs.working_directory }}
       run: |
-        if [ -z "${TF_VARS}" ]; then
-          echo "::error::GitHub Environment secret TF_VARS is empty. Add the terraform.tfvars contents as secret TF_VARS on this environment."
+        set -euo pipefail
+        CLOUD="$(echo "${CLOUD}" | tr '[:upper:]' '[:lower:]')"
+
+        case "${CLOUD}" in
+          aws)
+            SECRET_NAME="TF_VARS_AWS"
+            CONTENT="${TF_VARS_AWS}"
+            ;;
+          azure)
+            SECRET_NAME="TF_VARS_AZURE"
+            CONTENT="${TF_VARS_AZURE}"
+            ;;
+          *)
+            echo "::error::Unknown cloud '${CLOUD}' (expected aws or azure)"
+            exit 1
+            ;;
+        esac
+
+        # Backward compatible while migrating from a single TF_VARS secret
+        if [ -z "${CONTENT}" ] && [ -n "${TF_VARS_LEGACY}" ]; then
+          echo "::warning::Using legacy secret TF_VARS. Prefer ${SECRET_NAME} so AWS and Azure can coexist."
+          CONTENT="${TF_VARS_LEGACY}"
+          SECRET_NAME="TF_VARS (legacy)"
+        fi
+
+        if [ -z "${CONTENT}" ]; then
+          echo "::error::GitHub Environment secret ${SECRET_NAME} is empty for cloud=${CLOUD}."
+          echo "::error::Add terraform.tfvars contents as TF_VARS_AWS and/or TF_VARS_AZURE on this environment."
           exit 1
         fi
-        printf '%s\n' "${TF_VARS}" > terraform.tfvars
-        echo "Wrote ${{ inputs.working_directory }}/terraform.tfvars ($(wc -l < terraform.tfvars) lines)"
+
+        printf '%s\n' "${CONTENT}" > terraform.tfvars
+        echo "Wrote ${{ inputs.working_directory }}/terraform.tfvars from ${SECRET_NAME} ($(wc -l < terraform.tfvars) lines)"

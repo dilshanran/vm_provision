@@ -132,6 +132,9 @@ jobs:
       - name: Write terraform.tfvars
         uses: ./.github/actions/write-tfvars
         with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          tf_vars_aws: ${{ secrets.TF_VARS_AWS }}
+          tf_vars_azure: ${{ secrets.TF_VARS_AZURE }}
           tf_vars: ${{ secrets.TF_VARS }}
           working_directory: terraform/environments/${{ github.event.inputs.environment }}
 
@@ -188,6 +191,9 @@ jobs:
       - name: Write terraform.tfvars
         uses: ./.github/actions/write-tfvars
         with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          tf_vars_aws: ${{ secrets.TF_VARS_AWS }}
+          tf_vars_azure: ${{ secrets.TF_VARS_AZURE }}
           tf_vars: ${{ secrets.TF_VARS }}
           working_directory: terraform/environments/${{ github.event.inputs.environment }}
 
@@ -254,6 +260,9 @@ jobs:
       - name: Write terraform.tfvars
         uses: ./.github/actions/write-tfvars
         with:
+          cloud: ${{ env.CLOUD_PROVIDER }}
+          tf_vars_aws: ${{ secrets.TF_VARS_AWS }}
+          tf_vars_azure: ${{ secrets.TF_VARS_AZURE }}
           tf_vars: ${{ secrets.TF_VARS }}
           working_directory: terraform/environments/${{ github.event.inputs.environment }}
 
