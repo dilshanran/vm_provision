@@ -20,8 +20,9 @@ terraform {
   }
 }
 
-# AWS — credentials from env (GitHub OIDC / AWS CLI).
-# Skip checks so Azure-only runs can still init without AWS credentials.
+# AWS — real credentials from env on AWS runs (GitHub OIDC / AWS CLI).
+# On Azure-only runs the workflow stubs unused AWS env credentials so this
+# provider can configure (both providers are always declared).
 provider "aws" {
   region                      = var.region
   skip_credentials_validation = true

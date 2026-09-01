@@ -40,3 +40,16 @@ runs:
         client-id: ${{ inputs.azure_client_id }}
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
+
+    # Both providers are declared in every env. Azure-only runs still configure
+    # the AWS provider, and newer AWS provider versions require some credentials
+    # even when skip_* flags are set. Stub unused AWS auth for Azure jobs only.
+    - name: Stub unused AWS credentials (Azure-only runs)
+      if: ${{ inputs.cloud == 'azure' }}
+      shell: bash
+      run: |
+        {
+          echo "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE"
+          echo "AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+          echo "AWS_EC2_METADATA_DISABLED=true"
+        } >> "$GITHUB_ENV"
