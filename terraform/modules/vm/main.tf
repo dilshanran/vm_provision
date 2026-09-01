@@ -9,6 +9,7 @@ locals {
   )
 }
 
+# Select AWS or Azure submodule from cloud_provider.
 module "aws" {
   source = "./aws"
   count  = var.cloud_provider == "aws" ? 1 : 0

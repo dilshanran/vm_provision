@@ -1,15 +1,12 @@
-# =============================================================================
-# Azure â€” example tfvars for uat
+# Azure example tfvars (uat)
 #
-# Usage:
-#   - GitHub: paste into Environment secret TF_VARS_AZURE (uat)
-#   - Local:  copy to terraform.tfvars (gitignored)
+# GitHub: Environment secret TF_VARS_AZURE (uat)
+# Local:  terraform.tfvars (gitignored), then:
+#   ../../scripts/init-backend.sh azure
+# Workflow: cloud = azure
 #
-# Backend: ../../scripts/init-backend.sh azure
-# Workflow cloud input: azure
-#
-# Image: Amazon Linux 2023 Gen2 (Azure Marketplace / Ntegral)
-# =============================================================================
+# Image defaults to Amazon Linux 2023 Gen2 (Ntegral marketplace).
+# Marketplace plan fields below are required for that image.
 
 cloud_provider = "azure"
 region         = "eastus2"
@@ -35,7 +32,7 @@ azure_config = {
   ssh_public_key      = "ssh-rsa AAAA... your-key"
   enable_public_ip    = false
 
-  # Marketplace image + plan (required for AL2023)
+  # Marketplace image + plan (AL2023 Gen2)
   image_publisher = "ntegralinc1586961136942"
   image_offer     = "ntg_amzn_linux_2023"
   image_sku       = "ntg_amzn_linux_2023_gen2"

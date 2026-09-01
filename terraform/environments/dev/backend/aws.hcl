@@ -1,5 +1,5 @@
 # AWS remote state (S3 + DynamoDB lock)
-# Used by: ../../scripts/init-backend.sh aws
+# Selected by: ../../scripts/init-backend.sh aws
 
 bucket         = "unix-team-terraform-newstate"
 key            = "vm-provision/dev/terraform.tfstate"

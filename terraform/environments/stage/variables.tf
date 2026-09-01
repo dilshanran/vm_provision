@@ -1,7 +1,4 @@
-# =============================================================================
-# Common (required for both AWS and Azure)
-# =============================================================================
-
+# Common (required for aws and azure)
 variable "cloud_provider" {
   description = "Target cloud: aws or azure."
   type        = string
@@ -22,7 +19,7 @@ variable "vms" {
 }
 
 variable "tags" {
-  description = "Required tags for all VMs."
+  description = "Required tags for all VMs (Team, Application, CostCentre)."
   type        = map(string)
 
   validation {
@@ -34,10 +31,7 @@ variable "tags" {
   }
 }
 
-# =============================================================================
 # AWS (required when cloud_provider = "aws")
-# =============================================================================
-
 variable "aws_config" {
   description = "AWS settings. Omit ami_id to use the latest Amazon Linux 2023 AMI."
   type = object({
@@ -51,12 +45,9 @@ variable "aws_config" {
   default = null
 }
 
-# =============================================================================
 # Azure (required when cloud_provider = "azure")
-# =============================================================================
-
 variable "azure_config" {
-  description = "Azure settings. Defaults to Amazon Linux 2023 marketplace image."
+  description = "Azure settings. Defaults to Amazon Linux 2023 marketplace image (Ntegral)."
   type = object({
     resource_group_name = string
     admin_username      = string

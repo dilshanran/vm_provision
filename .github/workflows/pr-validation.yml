@@ -7,7 +7,7 @@ on:
       - ".github/workflows/**"
       - ".github/actions/**"
 
-# One validation run per PR (queue newer commits, do not cancel mid-run).
+# One validation run per PR (queue newer commits; do not cancel mid-run).
 concurrency:
   group: pr-validation-${{ github.event.pull_request.number }}
   cancel-in-progress: false
@@ -16,7 +16,6 @@ env:
   TF_VERSION: "1.9.0"
 
 jobs:
-  # Catch formatting and configuration errors early (Init → fmt → validate).
   checks:
     name: Checks (${{ matrix.environment }})
     runs-on: ubuntu-latest
@@ -50,15 +49,19 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Check mandatory tags
+      # Require mandatory tags in both cloud example tfvars files.
+      - name: Check mandatory tags in examples
         run: |
-          if [ ! -f terraform.tfvars.example ]; then
-            echo "No terraform.tfvars.example — skipping tag check"
-            exit 0
-          fi
-          for key in Team Application CostCentre; do
-            grep -qE "^\s*${key}\s*=" terraform.tfvars.example || {
-              echo "Missing mandatory tag in terraform.tfvars.example: ${key}"
+          for example in terraform.tfvars.aws.example terraform.tfvars.azure.example; do
+            if [ ! -f "$example" ]; then
+              echo "::error::Missing $example"
               exit 1
-            }
+            fi
+            for key in Team Application CostCentre; do
+              grep -qE "^\s*${key}\s*=" "$example" || {
+                echo "::error::Missing mandatory tag '${key}' in $example"
+                exit 1
+              }
+            done
+            echo "OK $example"
           done

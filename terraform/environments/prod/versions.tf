@@ -2,17 +2,10 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
-    # ---------------------------------------------------------------------------
-    # AWS
-    # ---------------------------------------------------------------------------
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
     }
-
-    # ---------------------------------------------------------------------------
-    # Azure
-    # ---------------------------------------------------------------------------
     azurerm = {
       source  = "hashicorp/azurerm"
       version = ">= 3.0"
@@ -20,9 +13,9 @@ terraform {
   }
 }
 
-# AWS — real credentials from env on AWS runs (GitHub OIDC / AWS CLI).
-# On Azure-only runs the workflow stubs unused AWS env credentials so this
-# provider can configure (both providers are always declared).
+# Both providers are always declared. On AWS runs, credentials come from
+# GitHub OIDC / AWS CLI. On Azure-only runs the workflow stubs unused AWS
+# credentials so this provider can still configure.
 provider "aws" {
   region                      = var.region
   skip_credentials_validation = true
@@ -31,7 +24,7 @@ provider "aws" {
   skip_region_validation      = true
 }
 
-# Azure — credentials from env (GitHub OIDC / Azure CLI).
+# Azure credentials come from GitHub OIDC / Azure CLI (ARM_* env vars).
 provider "azurerm" {
   features {}
 }

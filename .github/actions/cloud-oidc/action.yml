@@ -41,9 +41,8 @@ runs:
         tenant-id: ${{ inputs.azure_tenant_id }}
         subscription-id: ${{ inputs.azure_subscription_id }}
 
-    # Both providers are declared in every env. Azure-only runs still configure
-    # the AWS provider, and newer AWS provider versions require some credentials
-    # even when skip_* flags are set. Stub unused AWS auth for Azure jobs only.
+    # Both providers are always declared. Newer AWS provider versions still
+    # need credentials to configure, so stub unused AWS auth on Azure-only runs.
     - name: Stub unused AWS credentials (Azure-only runs)
       if: ${{ inputs.cloud == 'azure' }}
       shell: bash

@@ -1,10 +1,8 @@
-# =============================================================================
-# Prod — VM provisioning (AWS or Azure)
+# Prod VM provisioning (AWS or Azure).
 #
-# Set cloud_provider in tfvars / TF_VARS:
-#   "aws"   → uses aws_config
-#   "azure" → uses azure_config
-# =============================================================================
+# Set cloud_provider in GitHub Environment secrets:
+#   TF_VARS_AWS   when workflow cloud = aws
+#   TF_VARS_AZURE when workflow cloud = azure
 
 module "vm" {
   source   = "../../modules/vm"
@@ -17,10 +15,8 @@ module "vm" {
   region         = var.region
   subnet_id      = each.value.subnet_id
   tags           = var.tags
-
-  # Cloud-specific (only the matching block is used)
-  aws_config   = var.aws_config
-  azure_config = var.azure_config
+  aws_config     = var.aws_config
+  azure_config   = var.azure_config
 }
 
 output "vms" {

@@ -1,15 +1,11 @@
-# =============================================================================
-# AWS — example tfvars for uat
+# AWS example tfvars (uat)
 #
-# Usage:
-#   - GitHub: paste into Environment secret TF_VARS_AWS (uat)
-#   - Local:  copy to terraform_aws.tfvars (gitignored)
+# GitHub: Environment secret TF_VARS_AWS (uat)
+# Local:  terraform_aws.tfvars (gitignored), then:
+#   ../../scripts/init-backend.sh aws
+# Workflow: cloud = aws
 #
-# Backend: ../../scripts/init-backend.sh aws
-# Workflow cloud input: aws
-#
-# AMI: omit ami_id to auto-select latest Amazon Linux 2023
-# =============================================================================
+# Omit ami_id to auto-select latest Amazon Linux 2023.
 
 cloud_provider = "aws"
 region         = "us-east-1"
@@ -34,7 +30,7 @@ aws_config = {
   root_volume_size       = 30
   root_volume_type       = "gp3"
   # ami_id               = "ami-xxxxxxxx"   # optional
-  # key_name             = "unix-team-uat"  # optional
+  # key_name             = "unix-team-uat" # optional
   # iam_instance_profile = "..."            # optional
 }
 
