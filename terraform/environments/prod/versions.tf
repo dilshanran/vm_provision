@@ -2,10 +2,17 @@ terraform {
   required_version = ">= 1.5.0"
 
   required_providers {
+    # ---------------------------------------------------------------------------
+    # AWS
+    # ---------------------------------------------------------------------------
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
     }
+
+    # ---------------------------------------------------------------------------
+    # Azure
+    # ---------------------------------------------------------------------------
     azurerm = {
       source  = "hashicorp/azurerm"
       version = ">= 3.0"
@@ -13,8 +20,8 @@ terraform {
   }
 }
 
-# Real AWS provider. Credentials come from the environment (GitHub OIDC / AWS CLI).
-# Skip validation so Azure-only runs (aws module count = 0) still init without AWS creds.
+# AWS — credentials from env (GitHub OIDC / AWS CLI).
+# Skip checks so Azure-only runs can still init without AWS credentials.
 provider "aws" {
   region                      = var.region
   skip_credentials_validation = true
@@ -23,6 +30,7 @@ provider "aws" {
   skip_region_validation      = true
 }
 
+# Azure — credentials from env (GitHub OIDC / Azure CLI).
 provider "azurerm" {
   features {}
 }

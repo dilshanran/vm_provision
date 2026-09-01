@@ -1,6 +1,15 @@
-﻿# Example AWS terraform.tfvars for uat
-# Copy values into GitHub Environment secret TF_VARS (and local terraform.tfvars if needed).
-# Amazon Linux 2023 AMI is resolved automatically when ami_id is omitted.
+﻿# =============================================================================
+# AWS — example tfvars for uat
+#
+# Usage:
+#   - GitHub: paste into Environment secret TF_VARS (uat)
+#   - Local:  copy to terraform.tfvars (gitignored)
+#
+# Backend: ../../scripts/init-backend.sh aws
+# Workflow cloud input: aws
+#
+# AMI: omit ami_id to auto-select latest Amazon Linux 2023
+# =============================================================================
 
 cloud_provider = "aws"
 region         = "us-east-1"
@@ -16,17 +25,17 @@ vms = {
   "app-01" = {
     hostname      = "SYSENG-UNIX-UAT-01"
     instance_type = "t3.medium"
-    subnet_id     = "subnet-xxxxxxxx" # replace with your AWS subnet
+    subnet_id     = "subnet-xxxxxxxx"
   }
 }
 
 aws_config = {
-  # ami_id omitted => latest Amazon Linux 2023 x86_64 in this region
-  vpc_security_group_ids = ["sg-xxxxxxxx"] # replace with your SG(s)
-  # key_name             = "unix-team-uat"  # optional
-  # iam_instance_profile = "..."           # optional
+  vpc_security_group_ids = ["sg-xxxxxxxx"]
   root_volume_size       = 30
   root_volume_type       = "gp3"
+  # ami_id               = "ami-xxxxxxxx"   # optional
+  # key_name             = "unix-team-uat"  # optional
+  # iam_instance_profile = "..."            # optional
 }
 
-# azure_config is not required when cloud_provider = "aws"
+# Do not set azure_config when cloud_provider = "aws"
