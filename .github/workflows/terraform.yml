@@ -1,5 +1,15 @@
 name: Terraform
 
+# Manual plan / apply / destroy for one environment and cloud.
+# Inputs:
+#   action      - plan | apply | destroy
+#   environment - dev | stage | uat | prod
+#   cloud       - azure | aws  (selects OIDC, backend, and TF_VARS_*)
+#
+# GitHub Environment secrets:
+#   TF_VARS_AWS   - AWS tfvars
+#   TF_VARS_AZURE - Azure tfvars
+
 on:
   workflow_dispatch:
     inputs:
@@ -29,7 +39,7 @@ on:
           - aws
         default: azure
 
-# One deployment at a time per environment + cloud (queue, do not cancel).
+# One deployment at a time per environment + cloud (queue; do not cancel).
 concurrency:
   group: vm-provision-${{ github.event.inputs.environment }}-${{ github.event.inputs.cloud }}
   cancel-in-progress: false
@@ -39,7 +49,7 @@ env:
   CLOUD_PROVIDER: ${{ github.event.inputs.cloud }}
 
 jobs:
-  # Catch formatting and configuration errors early before plan/apply/destroy.
+  # Validate formatting and configuration before plan/apply/destroy.
   checks:
     name: Checks (${{ github.event.inputs.environment }} / ${{ github.event.inputs.cloud }})
     runs-on: ubuntu-latest
@@ -48,7 +58,7 @@ jobs:
       id-token: write
       contents: read
     env:
-      # Terraform OIDC for Service Principal (Azure CLI SP auth is not supported)
+      # Azure OIDC for azurerm backend/provider (ignored on AWS-only resource paths).
       ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}

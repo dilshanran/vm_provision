@@ -1,7 +1,5 @@
-# ---------------------------------------------------------------------------
-# Common interface — callers pass the same variables regardless of cloud.
-# Cloud-specific settings live in aws_config / azure_config objects.
-# ---------------------------------------------------------------------------
+# Shared VM interface for AWS and Azure.
+# Callers pass common fields plus aws_config or azure_config.
 
 variable "cloud_provider" {
   description = "Target cloud: aws or azure."
