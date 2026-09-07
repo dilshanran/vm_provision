@@ -1,0 +1,34 @@
+# AWS example tfvars (nausani_vm)
+#
+# GitHub: Environment secret TF_VARS_AWS (nausani_vm)
+# Local:  terraform_aws.tfvars (gitignored), then:
+#   ../../scripts/init-backend.sh aws
+# Workflow: environment = nausani_vm, cloud = aws
+#
+# Omit ami_id to auto-select latest Amazon Linux 2023.
+
+cloud_provider = "aws"
+region         = "us-east-1"
+
+tags = {
+  Team        = "unix"
+  Application = "nausani"
+  CostCentre  = "IT-OPS-001"
+  Environment = "nausani_vm"
+}
+
+vms = {
+  "app-01" = {
+    hostname      = "SYSENG-UNIX-NAUSANI-01"
+    instance_type = "t3.medium"
+    subnet_id     = "subnet-xxxxxxxx"
+  }
+}
+
+aws_config = {
+  vpc_security_group_ids = ["sg-xxxxxxxx"]
+  root_volume_size       = 30
+  root_volume_type       = "gp3"
+}
+
+# Do not set azure_config when cloud_provider = "aws"

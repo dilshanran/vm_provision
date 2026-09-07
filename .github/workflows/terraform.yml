@@ -3,7 +3,7 @@ name: Terraform
 # Manual plan / apply / destroy for one environment and cloud.
 # Inputs:
 #   action      - plan | apply | destroy
-#   environment - dev | stage | uat | prod
+#   environment - dev | stage | uat | prod | nausani_vm
 #   cloud       - azure | aws  (selects OIDC, backend, and TF_VARS_*)
 #
 # GitHub Environment secrets:
@@ -30,6 +30,7 @@ on:
           - stage
           - uat
           - prod
+          - nausani_vm
       cloud:
         description: "Cloud provider"
         required: true

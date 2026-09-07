@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, stage, uat, prod]
+        environment: [dev, stage, uat, prod, nausani_vm]
     permissions:
       contents: read
     defaults:

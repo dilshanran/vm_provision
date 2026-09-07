@@ -19,6 +19,7 @@ on:
           - stage
           - uat
           - prod
+          - nausani_vm
         default: all
       cloud:
         description: "Cloud provider"
@@ -47,7 +48,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "$INPUT" ] && [ "$INPUT" != "all" ]; then
             echo "environments=[\"${INPUT}\"]" >> "$GITHUB_OUTPUT"
           else
-            echo 'environments=["dev","stage","uat","prod"]' >> "$GITHUB_OUTPUT"
+            echo 'environments=["dev","stage","uat","prod","nausani_vm"]' >> "$GITHUB_OUTPUT"
           fi
 
   drift:
