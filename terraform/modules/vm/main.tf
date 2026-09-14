@@ -51,4 +51,8 @@ module "azure" {
   plan_name           = try(var.azure_config.plan_name, null)
   plan_product        = try(var.azure_config.plan_product, null)
   plan_publisher      = try(var.azure_config.plan_publisher, null)
+
+  enable_syslog_collector        = try(var.azure_config.enable_syslog_collector, false)
+  syslog_source_address_prefixes = try(var.azure_config.syslog_source_address_prefixes, [])
+  enable_monitor_agent           = try(var.azure_config.enable_monitor_agent, false)
 }

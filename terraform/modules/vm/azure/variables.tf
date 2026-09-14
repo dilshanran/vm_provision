@@ -81,3 +81,26 @@ variable "plan_publisher" {
   type        = string
   default     = null
 }
+
+variable "enable_syslog_collector" {
+  description = "Install and configure rsyslog to receive remote syslog on UDP 514, and open the port to syslog_source_address_prefixes."
+  type        = bool
+  default     = false
+}
+
+variable "syslog_source_address_prefixes" {
+  description = "Source CIDRs allowed to send syslog on UDP 514 (e.g. Nasuni Edge Appliances). UDP 514 is unauthenticated, so never use \"*\"."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = !contains(var.syslog_source_address_prefixes, "*")
+    error_message = "syslog_source_address_prefixes must not contain \"*\"; list the sending appliances explicitly."
+  }
+}
+
+variable "enable_monitor_agent" {
+  description = "Attach a system-assigned identity and install the Azure Monitor Agent so a Data Collection Rule can ship logs."
+  type        = bool
+  default     = false
+}

@@ -82,6 +82,10 @@ variable "azure_config" {
     plan_name      = optional(string, "ntg_amzn_linux_2023_gen2")
     plan_product   = optional(string, "ntg_amzn_linux_2023")
     plan_publisher = optional(string, "ntegralinc1586961136942")
+    # Syslog collector (off unless the environment opts in)
+    enable_syslog_collector        = optional(bool, false)
+    syslog_source_address_prefixes = optional(list(string), [])
+    enable_monitor_agent           = optional(bool, false)
   })
   default = null
 

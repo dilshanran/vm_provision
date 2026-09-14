@@ -18,22 +18,42 @@ resource "azurerm_public_ip" "vm" {
 }
 
 resource "azurerm_network_security_group" "vm" {
-  count = var.enable_public_ip ? 1 : 0
+  count = local.nsg_required ? 1 : 0
 
   name                = local.nsg_name
   location            = var.region
   resource_group_name = var.resource_group_name
 
-  security_rule {
-    name                       = "AllowSSH"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "*"
-    destination_address_prefix = "*"
+  dynamic "security_rule" {
+    for_each = var.enable_public_ip ? [1] : []
+
+    content {
+      name                       = "AllowSSH"
+      priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "22"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    }
+  }
+
+  dynamic "security_rule" {
+    for_each = local.syslog_rule_required ? [1] : []
+
+    content {
+      name                       = "AllowSyslogUDP"
+      priority                   = 110
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Udp"
+      source_port_range          = "*"
+      destination_port_range     = "514"
+      source_address_prefixes    = var.syslog_source_address_prefixes
+      destination_address_prefix = "*"
+    }
   }
 
   tags = var.tags
@@ -55,7 +75,7 @@ resource "azurerm_network_interface" "vm" {
 }
 
 resource "azurerm_network_interface_security_group_association" "vm" {
-  count = var.enable_public_ip ? 1 : 0
+  count = local.nsg_required ? 1 : 0
 
   network_interface_id      = azurerm_network_interface.vm.id
   network_security_group_id = azurerm_network_security_group.vm[0].id
@@ -74,9 +94,21 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
   disable_password_authentication = true
 
+  # Bootstraps rsyslog for remote reception. Changing this replaces the VM.
+  custom_data = var.enable_syslog_collector ? base64encode(local.syslog_cloud_init) : null
+
   admin_ssh_key {
     username   = var.admin_username
     public_key = var.ssh_public_key
+  }
+
+  # Azure Monitor Agent authenticates with a managed identity.
+  dynamic "identity" {
+    for_each = var.enable_monitor_agent ? [1] : []
+
+    content {
+      type = "SystemAssigned"
+    }
   }
 
   os_disk {
@@ -104,6 +136,21 @@ resource "azurerm_linux_virtual_machine" "vm" {
   }
 
   computer_name = substr(replace(var.hostname, "-", ""), 0, 15)
+
+  tags = var.tags
+}
+
+# Amazon Linux 2023 support requires agent 1.33.1 or later.
+resource "azurerm_virtual_machine_extension" "monitor_agent" {
+  count = var.enable_monitor_agent ? 1 : 0
+
+  name                       = "AzureMonitorLinuxAgent"
+  virtual_machine_id         = azurerm_linux_virtual_machine.vm.id
+  publisher                  = "Microsoft.Azure.Monitor"
+  type                       = "AzureMonitorLinuxAgent"
+  type_handler_version       = "1.33"
+  auto_upgrade_minor_version = true
+  automatic_upgrade_enabled  = true
 
   tags = var.tags
 }

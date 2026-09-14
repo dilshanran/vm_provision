@@ -62,6 +62,29 @@ variable "azure_config" {
     plan_name           = optional(string, "ntg_amzn_linux_2023_gen2")
     plan_product        = optional(string, "ntg_amzn_linux_2023")
     plan_publisher      = optional(string, "ntegralinc1586961136942")
+    # Syslog collector for Nasuni Edge Appliances
+    enable_syslog_collector        = optional(bool, false)
+    syslog_source_address_prefixes = optional(list(string), [])
+    enable_monitor_agent           = optional(bool, false)
   })
   default = null
+}
+
+# Log Analytics / syslog ingestion
+variable "log_analytics_workspace_id" {
+  description = "Resource ID of the Log Analytics workspace receiving syslog (e.g. Syseng-AVD-log). May live in another subscription. Leave null to skip creating the Data Collection Rule."
+  type        = string
+  default     = null
+}
+
+variable "syslog_facility_names" {
+  description = "Syslog facilities collected by the Data Collection Rule. Nasuni sends on the local* facilities by default."
+  type        = list(string)
+  default     = ["local0", "local1", "local2", "local3", "local4", "local5", "local6", "local7", "user"]
+}
+
+variable "syslog_log_levels" {
+  description = "Syslog severities collected by the Data Collection Rule. Widen to Info/Debug only if the extra ingestion cost is acceptable."
+  type        = list(string)
+  default     = ["Warning", "Error", "Critical", "Alert", "Emergency"]
 }
